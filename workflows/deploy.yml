@@ -1,0 +1,17 @@
+name: deploy
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: [self-hosted, runner-node]
+    steps:
+      - name: Run a multi-line script
+        run: |
+          cd /home/zom/ots
+          git pull
+          npm i
+          sudo systemctl restart ots.olhustad.no
