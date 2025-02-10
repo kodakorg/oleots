@@ -34,8 +34,8 @@ Before you begin, ensure you have met the following requirements:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/kodakorg/ots.git
+   cd ots
    ```
 
 2. **Install Dependencies:**
@@ -74,6 +74,9 @@ Before you begin, ensure you have met the following requirements:
 3. **View and Destroy:**
 
    When the recipient visits the URL, the encrypted secret is fetched from Redis, decrypted in the browser using the key from the URL, and then immediately destroyed from the server to ensure one-time access.
+
+## Demo
+The app is available on https://ots.olhustad.no if you want to test it out.
 
 ## Contributing
 
