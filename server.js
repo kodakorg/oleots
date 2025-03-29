@@ -6,7 +6,8 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
-app.use('/css', express.static(path.join(__dirname, 'public/css')))
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/img', express.static(path.join(__dirname, 'public/img')));
 
 app.set('view engine', 'ejs');
 
@@ -52,16 +53,45 @@ app.post('/secret', async (req, res) => {
 
 app.get('/secret/:id', async (req, res) => {
   const { id } = req.params;
+
+  // Set headers to discourage link previews
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+
+  // Check if it's a bot/crawler/link previewer
+  const userAgent = req.headers['user-agent'] || '';
+  const isCrawler = /bot|crawler|spider|preview|facebook|twitter|linkedin|slack|discord|whatsapp|messenger/i.test(userAgent);
+
+  if (isCrawler) {
+    // For crawlers, return a generic page without accessing the actual secret
+    return res.render('view_secret', { secret: "Please open this link directly in your browser" });
+  }
+
   try {
     const encryptedSecret = await client.get(id);
     if (!encryptedSecret) {
       return res.render('view_secret', { secret: "notfound" });
     }
-    await client.del(id);
+
+    // Only delete the secret once the user explicitly requests to view it
+    // The actual deletion will now happen via API call
     res.render('view_secret', { secret: encryptedSecret });
   } catch (error) {
     console.error('Error getting secret:', error);
     res.status(500).send('Error getting secret (500)');
+  }
+});
+
+// New endpoint to delete the secret after user confirmation
+app.delete('/secret/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await client.del(id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting secret:', error);
+    res.status(500).json({ error: 'Error deleting secret' });
   }
 });
 
